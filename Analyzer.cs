@@ -53,8 +53,8 @@ namespace bot
 				if (m.Sha == b.Sha)
 				{
 					// rewind. note; existence of these commits in some other tree is irrelevant.
-					var newCommits = Git.GetCommitsBetween(m, b);
-					return "{0} (rw; -{1} commits removed)".F(basicReport, newCommits.Length);
+					var newCommits = Git.GetCommitsBetween(m, a);
+					return "{0} (rw; {1} commits removed)".F(basicReport, newCommits.Length);
 				}
 
 				return basicReport;
