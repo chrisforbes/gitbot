@@ -132,7 +132,22 @@ namespace bot
 					else
 						SendTo(agent, "Alias doesn't exist");
 				}
-				});
+			});
+			
+			Add("@status <alias>", args =>
+			{
+				lock ( repos )
+				{
+					if (repos.Any( a => a.Alias == args[1]))
+					{
+						var repo = repos.Where( r => r.Alias == args[1] ).First();
+						foreach (var r in repo.Refs)
+							SendTo(agent, "{0}: ({1}) {2}".F(r.Name, r.ShortSha, Git.GetMessage(r)));
+					}
+					else
+						SendTo(agent, "Alias doesn't exist");
+				}
+			});
 
 			Add("@repolist", args =>
 			{

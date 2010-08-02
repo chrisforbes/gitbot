@@ -60,5 +60,10 @@ namespace bot
 			return External.Run("git", "--git-dir={0} log {1}..{2} --graph --oneline --no-color".F(
 				GitRoot, a.Sha, b.Sha)).StandardOutput.Lines();
 		}
+		
+		public static string GetMessage(Ref a)	
+		{
+			return External.Run("git", "--git-dir={0} log {1} -1 --format=\"%s\"".F(GitRoot, a.Sha)).StandardOutput.Lines().FirstOrDefault();		
+		}
 	}
 }
