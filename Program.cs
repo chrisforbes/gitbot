@@ -1,10 +1,9 @@
-﻿using System.Net.Sockets;
-using System.IO;
-using System;
-using System.Threading;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+using System.Net.Sockets;
+using System.Threading;
+using System.IO;
 
 namespace bot
 {
@@ -27,7 +26,8 @@ namespace bot
 		static string UserName = "pizzabot2";
 		static string Nick = "openra_pizzabot2";
 		static string IRCName = "PizzaBot Returns!";
-		
+
+		static string GitRoot = "state.git";
 
 		static void Main(string[] args)
 		{
@@ -36,6 +36,11 @@ namespace bot
 			EstablishConnection();
 			conn.OnCommand += OnCommand;
 			Connect();
+
+			if (!Directory.Exists(GitRoot))
+			{
+				External.Run("git", "init --bare {0}".F(GitRoot));
+			}
 
 			while( conn.Connected )
 			{
