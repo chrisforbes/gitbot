@@ -38,6 +38,7 @@ namespace bot
 
 		public static bool Fetch()
 		{
+			External.Run("rm", "-rf {0}/refs/remotes/".F(GitRoot));
 			return !External.Run("git", "--git-dir={0} fetch --all".F(GitRoot)).Failed;
 		}
 
