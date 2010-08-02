@@ -11,7 +11,7 @@ namespace bot
 				.Select(r => Git.GetMergeBase(a, r))
 				.Select(r => Pair.New(r, Git.GetCommitsBetween(r, a).Length))
 				.OrderBy(r => r.u)
-				.FirstOrDefault();
+				.FirstOrDefault(r => r.t.Sha != "");
 		}
 
 		static string CharacterizeChange(Ref a, Ref b, Ref[] oldRefs)
@@ -34,6 +34,9 @@ namespace bot
 				var basicReport = "\t{0}/{1}: {2} -> {3}".F(a.Alias, a.Name, a.ShortSha, b.ShortSha);
 
 				var m = Git.GetMergeBase(a, b);
+				if (m.Sha == "")
+					return basicReport;
+
 				if (m.Sha == a.Sha)
 				{
 					// fast-forward. todo: find out if anyone else had these commits first.
