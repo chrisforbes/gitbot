@@ -31,6 +31,8 @@ namespace bot
 
 		static void Main(string[] args)
 		{
+			UseSocks = args.Contains("--socks");
+
 			EstablishConnection();
 			conn.OnCommand += OnCommand;
 			Connect();
@@ -74,72 +76,67 @@ namespace bot
 		static void OnCommand(string c)
 		{
 			var agent = c.Split(':', '!', ' ').ElementAt(1);
+			var commands = new Dictionary<string, Action<string[]>>();
+			Action<string, Action<string[]>> Add = commands.Add;
 
-			if (c.Contains(":@add"))
-			{
-				var args = GetArgs(c, ":@add");
-				if (args.Length != 3)
+			Add("@add <alias> <username/repo>", args =>
+					{
+						if (!repos.Any(a => a.Alias == args[1]))
+						{
+							lock (repos)
+								repos.Add(new Repo(args[1], args[2]));
+							SendTo(agent, "Done.");
+						}
+						else
+							SendTo(agent, "Alias already exists");
+
+						NextCheckTime = Environment.TickCount;
+					});
+
+			Add("@rm <alias>", args =>
+					{
+						if (repos.Any(a => a.Alias == args[1]))
+						{
+							lock (repos)
+								repos.RemoveAll(r => r.Alias == args[1]);
+							SendTo(agent, "Done.");
+						}
+						else
+							SendTo(agent, "Alias doesn't exist");
+					});
+
+			Add("@repolist", args =>
+					{
+						var names = "";
+						lock (repos)
+							names = string.Join(", ", repos.Select(r => r.Alias).ToArray());
+
+						SendTo(agent, "I'm currently tracking: {0}".F(names));
+					});
+
+			Add("@quit", args =>
+					{
+						SendTo(agent, "Ok, Bye!");
+						conn.Write("QUIT");
+						conn.Stop();
+					});
+
+			Add("@help", args =>
 				{
-					SendTo(agent, "What? ({0})".F(args.Length));
-					return;
-				}
-				
-				if (!repos.Any( a => a.Alias == args[1]))
+					SendTo(agent, "Commands:");
+					foreach (var cmd in commands.Keys)
+						SendTo(agent, "\t{0}".F(cmd));
+				});
+
+			foreach( var cmd in commands )
+				if (c.Contains(":" + cmd.Key.Split(' ')[0]))
 				{
-					lock(repos)
-						repos.Add(new Repo(args[1], args[2]));
-					SendTo(agent, "Done.");
+					var args = GetArgs(c, ":" + cmd.Key.Split(' ')[0]);
+					if (args.Length != cmd.Key.Split(' ').Length)
+						SendTo(agent, "What?");
+					else
+						cmd.Value(args);
 				}
-				else
-					SendTo(agent, "Alias already exists");
-
-				
-				NextCheckTime = Environment.TickCount;
-			}
-
-			if (c.Contains(":@rm"))
-			{
-				var args = GetArgs(c, ":@rm");
-				if (args.Length != 2)
-				{
-					SendTo(agent, "What?");
-					return;
-				}
-
-				if (repos.Any( a => a.Alias == args[1]))
-				{
-					lock (repos)
-						repos.RemoveAll(r => r.Alias == args[1]);
-					SendTo(agent, "Done.");
-				}
-				else
-					SendTo(agent, "Alias doesn't exist");
-			}
-
-			if (c.Contains(":@repolist"))
-			{
-				var names = "";
-				lock( repos )
-					names = string.Join(", ", repos.Select(r => r.Alias).ToArray());
-
-				 SendTo(agent, "I'm currently tracking: {0}".F(names));
-			}
-			
-			if (c.Contains(":@quit"))
-			{
-				SendTo(agent, "Ok, Bye!");
-				conn.Write("QUIT");
-				conn.Stop();
-			}
-			
-			if (c.Contains(":@help"))
-			{
-				SendTo(agent, "Commands:");
-				SendTo(agent, "\t@add alias username/Repo");
-				SendTo(agent, "\t@rm alias");
-				SendTo(agent, "\t@repolist");
-				SendTo(agent, "\t@quit");
-			}
 		}
 
 		static string[] GetArgs(string command, string directive)
