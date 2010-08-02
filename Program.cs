@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -25,7 +25,7 @@ namespace bot
 		static string UserName = "pizzabot2";
 		static string Nick = "openra_pizzabot2";
 		static string IRCName = "PizzaBot Returns!";
-
+		
 		static void Main(string[] args)
 		{
 			Git.GitRoot = "state.git";
@@ -99,59 +99,63 @@ namespace bot
 			Action<string, Action<string[]>> Add = commands.Add;
 
 			Add("@add <alias> <username/repo>", args =>
+			{
+				lock ( repos )
+				{
+					if (!repos.Any(a => a.Alias == args[1]))
 					{
-						if (!repos.Any(a => a.Alias == args[1]))
-						{
-							if (!Git.AddRepo(args[1], args[2]))
-								SendTo(agent, "Failed adding alias");
-							else
-							{
-								lock (repos)
-									repos.Add(new Repo(args[1]));
-								SendTo(agent, "Done.");
-							}
-						}
+						if (!Git.AddRepo(args[1], args[2]))
+							SendTo(agent, "Failed adding alias");
 						else
-							SendTo(agent, "Alias already exists");
-
-						NextCheckTime = Environment.TickCount;
-					});
-
-			Add("@rm <alias>", args =>
-					{
-						if (repos.Any(a => a.Alias == args[1]))
 						{
-							lock (repos)
-								repos.RemoveAll(r => r.Alias == args[1]);
-							Git.RemoveRepo(args[1]);
+							repos.Add(new Repo(args[1]));
 							SendTo(agent, "Done.");
 						}
-						else
-							SendTo(agent, "Alias doesn't exist");
-					});
+					}
+					else
+						SendTo(agent, "Alias already exists");
+				}
+
+				NextCheckTime = Environment.TickCount;
+			});
+
+			Add("@rm <alias>", args =>
+			{
+				lock ( repos )
+				{
+					if (repos.Any( a => a.Alias == args[1]))
+					{
+						repos.RemoveAll(r => r.Alias == args[1]);
+							Git.RemoveRepo(args[1]);
+						SendTo(agent, "Done.");
+					}
+					else
+						SendTo(agent, "Alias doesn't exist");
+				}
+				});
 
 			Add("@repolist", args =>
-					{
-						var names = "";
-						lock (repos)
-							names = string.Join(", ", repos.Select(r => r.Alias).ToArray());
+			{
+				var names = "";
+				lock( repos )
+					names = string.Join(", ", repos.Select(r => r.Alias).ToArray());
 
-						SendTo(agent, "I'm currently tracking: {0}".F(names));
-					});
-
+				 SendTo(agent, "I'm currently tracking: {0}".F(names));
+			});
+			
 			Add("@quit", args =>
-					{
-						SendTo(agent, "Ok, Bye!");
-						conn.Write("QUIT");
-						conn.Stop();
-					});
-
+			{
+				SendTo(agent, "Ok, Bye!");
+				conn.Write("QUIT");
+				conn.Stop();
+			});
+			
 			Add("@help", args =>
-				{
-					SendTo(agent, "Commands:");
+			{
+				SendTo(agent, "Commands:");
 					foreach (var cmd in commands.Keys)
 						SendTo(agent, "\t{0}".F(cmd));
-				});
+			});
 
 			foreach( var cmd in commands )
 				if (c.Contains(":" + cmd.Key.Split(' ')[0]))
@@ -178,7 +182,7 @@ namespace bot
 		{
 			conn.Write("PRIVMSG {0} :{1}".F(Channel, res));
 		}
-
+		
 		static void Update()
 		{
 			Repo[] snapshot;
