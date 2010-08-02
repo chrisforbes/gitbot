@@ -4,6 +4,7 @@ using System;
 using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 
 namespace bot
 {
@@ -14,13 +15,21 @@ namespace bot
 		static Connection conn;
 		static List<Repo> repos = new List<Repo>();
 		static int NextCheckTime = Environment.TickCount;
+		static bool UseSocks = false;
 
 		static void Main(string[] args)
 		{
-			var sock = SocksProxy.ConnectToSocks5Proxy("127.0.0.1", 1080,
-				"irc.freenode.net", 6667, "", "");
-			conn = new Connection(sock);
-
+			Socket s;
+			if (UseSocks)
+				s = SocksProxy.ConnectToSocks5Proxy("127.0.0.1", 1080,
+					"irc.freenode.net", 6667, "", "");
+			else
+			{
+				s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+				s.Connect("irc.freenode.net", 6667);
+			}
+			conn = new Connection(s);
+			
 			conn.OnCommand += OnCommand;
 
 			conn.Run();
