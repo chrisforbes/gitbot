@@ -124,6 +124,22 @@ namespace bot
 
 				 SendTo(agent, "I'm currently tracking: {0}".F(names));
 			}
+			
+			if (c.Contains(":@quit"))
+			{
+				SendTo(agent, "Ok, Bye!");
+				conn.Write("QUIT");
+				conn.Stop();
+			}
+			
+			if (c.Contains(":@help"))
+			{
+				SendTo(agent, "Commands:");
+				SendTo(agent, "\t@add alias username/Repo");
+				SendTo(agent, "\t@rm alias");
+				SendTo(agent, "\t@repolist");
+				SendTo(agent, "\t@quit");
+			}
 		}
 
 		static string[] GetArgs(string command, string directive)
