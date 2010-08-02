@@ -36,6 +36,12 @@ namespace bot
 								GitRoot, alias, BaseUrl, githubName)).Failed;
 		}
 
+		public static bool RemoveRepo(string alias)
+		{
+			return !External.Run("git", "--git-dir={0} remote rm {1}".F(
+				GitRoot, alias)).Failed;
+		}
+
 		public static bool Fetch()
 		{
 			External.Run("rm", "-rf {0}/refs/remotes/".F(GitRoot));

@@ -123,6 +123,7 @@ namespace bot
 						{
 							lock (repos)
 								repos.RemoveAll(r => r.Alias == args[1]);
+							Git.RemoveRepo(args[1]);
 							SendTo(agent, "Done.");
 						}
 						else
