@@ -38,13 +38,11 @@ namespace bot
 				{
 					// fast-forward. todo: find out if anyone else had these commits first.
 					var newCommits = Git.GetCommitsBetween(m, b).Length;
-					if (newCommits == 0)
-					{
-						var prevOwner = oldRefs.FirstOrDefault(q => q.Sha == b.Sha);
-						if (prevOwner != null)
-							return "{0} (ff; +{1} new commits from {2}/{3})".F(basicReport, newCommits,
-								prevOwner.Alias, prevOwner.Name);
-					}
+
+					var prevOwner = oldRefs.FirstOrDefault(q => q.Sha == b.Sha);
+					if (prevOwner != null)
+						return "{0} (ff; +{1} new commits from {2}/{3})".F(basicReport, newCommits,
+							prevOwner.Alias, prevOwner.Name);
 
 					return "{0} (ff; +{1} new commits)".F(basicReport, newCommits);
 				}
