@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bot", "bot.csproj", "{DB51BB8A-9DC1-4A7B-81F9-02A303A082C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ghapi", "..\ghapi\ghapi.csproj", "{A691848D-96DF-48EA-A00E-3626021A5F59}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DB51BB8A-9DC1-4A7B-81F9-02A303A082C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB51BB8A-9DC1-4A7B-81F9-02A303A082C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB51BB8A-9DC1-4A7B-81F9-02A303A082C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB51BB8A-9DC1-4A7B-81F9-02A303A082C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A691848D-96DF-48EA-A00E-3626021A5F59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A691848D-96DF-48EA-A00E-3626021A5F59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A691848D-96DF-48EA-A00E-3626021A5F59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A691848D-96DF-48EA-A00E-3626021A5F59}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
