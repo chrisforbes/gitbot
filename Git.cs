@@ -38,7 +38,7 @@ namespace bot
 
 		public static bool Fetch()
 		{
-			return !External.Run("git", "--git-dir={0} fetch --all").Failed;
+			return !External.Run("git", "--git-dir={0} fetch --all".F(GitRoot)).Failed;
 		}
 	}
 }
