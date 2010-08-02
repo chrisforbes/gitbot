@@ -40,5 +40,16 @@ namespace bot
 		{
 			return !External.Run("git", "--git-dir={0} fetch --all".F(GitRoot)).Failed;
 		}
+
+		public static string GetMergeBase( Ref a, Ref b )
+		{
+			return External.Run("git", "--git-dir={0} merge-base {1} {2}".F(GitRoot, a.Sha, b.Sha)).StandardOutput;
+		}
+
+		public static string[] GetCommitsBetween(Ref a, Ref b)
+		{
+			return External.Run("git", "--git-dir={0} log {1}..{2} --graph --online --no-color".F(
+				GitRoot, a.Sha, b.Sha)).StandardOutput.Lines();
+		}
 	}
 }

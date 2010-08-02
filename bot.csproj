@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analyzer.cs" />
     <Compile Include="Connection.cs" />
     <Compile Include="External.cs" />
     <Compile Include="Exts.cs" />

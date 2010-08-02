@@ -177,7 +177,7 @@ namespace bot
 		{
 			conn.Write("PRIVMSG {0} :{1}".F(Channel, res));
 		}
-		
+
 		static void Update()
 		{
 			Repo[] snapshot;
@@ -187,7 +187,7 @@ namespace bot
 			Git.Fetch();
 
 			var lastRepo = "";
-			foreach (var info in Repo.Update(snapshot, Git.GetRefs() ))
+			foreach (var info in Analyzer.Update(snapshot, Git.GetRefs()))
 			{
 				var alias = info.Split('/')[0];
 				if (alias != lastRepo)
