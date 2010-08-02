@@ -65,5 +65,22 @@ namespace bot
 		{
 			return External.Run("git", "--git-dir={0} log {1} -1 --format=\"%s\"".F(GitRoot, a.Sha)).StandardOutput.Lines().FirstOrDefault();		
 		}
+		
+		public static string GetRemoteUrl(Ref a)
+		{
+			//TODO: Regex
+			return External.Run("git", "--git-dir={0} remote show -n {1}".F(GitRoot, a.Alias)).StandardOutput.Lines()
+				.Where( s => s.Contains("Fetch URL: ") ).FirstOrDefault().Replace("Fetch URL: ", "").Trim();
+		}
+		
+		public static string GetRemoteName(Ref a)
+		{
+			return GetRemoteUrl(a).Replace(BaseUrl, "").Split('/')[0];
+		}
+		
+		public static string GetRemoteRepoName(Ref a)
+		{
+			return GetRemoteUrl(a).Replace(BaseUrl, "").Split('/')[1];
+		}
 	}
 }

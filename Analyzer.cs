@@ -31,7 +31,8 @@ namespace bot
 
 			// the meaty case: this branch existed, 
 			{
-				var basicReport = "\t{0}/{1}: {2} -> {3}".F(a.Alias, a.Name, a.ShortSha, b.ShortSha);
+				var url = Shortener.Shorten(a, b);
+				var basicReport = "\t{0}/{1}: {2} -> {3} {4}".F(a.Alias, a.Name, a.ShortSha, b.ShortSha, url);
 
 				var m = Git.GetMergeBase(a, b);
 				if (m.Sha == "")
