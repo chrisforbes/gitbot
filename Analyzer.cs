@@ -57,6 +57,12 @@ namespace bot
 					return "{0} (rw; {1} commits removed)".F(basicReport, newCommits.Length);
 				}
 
+				if (Git.GetCommitsBetween(m, a).Length == 1 &&
+					Git.GetCommitsBetween(m, b).Length == 1)
+				{
+					return "{0} (amended)".F(basicReport);
+				}
+
 				return basicReport;
 			}
 		}

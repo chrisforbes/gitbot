@@ -25,7 +25,7 @@ OPTIONS
 	
 BUGS
 	Various cases could be interpreted more cleverly -- rebases, 
-		amendments, combinations of history actions.
+		combinations of history actions.
 	It's also possible to explode, which is bad.
 	Most things that should be configurable aren't.
 
