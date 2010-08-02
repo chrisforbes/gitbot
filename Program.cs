@@ -84,10 +84,16 @@ namespace bot
 					return;
 				}
 
-				lock(repos)
-					repos.Add(new Repo(args[1], args[2]));
+				if (repos.Select( a => a.Name == args[1] || a.Alias == args[2]).Count() == 0)
+				{
+					lock(repos)
+						repos.Add(new Repo(args[1], args[2]));
+					SendTo(agent, "Done.");
+				}
+				else
+					SendTo(agent, "Alias already exists");
 
-				SendTo(agent, "Done.");
+				
 				NextCheckTime = Environment.TickCount;
 			}
 
@@ -100,10 +106,14 @@ namespace bot
 					return;
 				}
 
-				lock (repos)
-					repos.RemoveAll(r => r.Alias == args[1]);
-
-				SendTo(agent, "Done.");
+				if (repos.Select( a => a.Alias == args[1]).Count() == 1)
+				{
+					lock (repos)
+						repos.RemoveAll(r => r.Alias == args[1]);
+					SendTo(agent, "Done.");
+				}
+				else
+					SendTo(agent, "Alias doesn't exist");
 			}
 
 			if (c.Contains(":@repolist"))
