@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace bot
 {
@@ -27,20 +28,35 @@ namespace bot
 		static string Nick = "openra_pizzabot2";
 		static string IRCName = "PizzaBot Returns!";
 
-		static string GitRoot = "state.git";
-
 		static void Main(string[] args)
 		{
+			Git.GitRoot = "state.git";
+			Git.BaseUrl = "git://github.com/";
+
+			Git.Init();
+
+			var initialRepoList = Git.GetRemotes();
+			Console.WriteLine("Initial repo list:");
+
+			foreach (var a in initialRepoList)
+			{
+				Console.WriteLine("\t{0}", a);
+				repos.Add(new Repo(a));
+			}
+
+			if (!initialRepoList.Any())
+				Console.WriteLine("\t(none)");
+
+
+			var initialRefs = Git.GetRefs();
+			foreach (var repo in repos)
+				repo.Refs = initialRefs.Where(r => r.Alias == repo.Alias).ToArray();
+
 			UseSocks = args.Contains("--socks");
 
 			EstablishConnection();
 			conn.OnCommand += OnCommand;
 			Connect();
-
-			if (!Directory.Exists(GitRoot))
-			{
-				External.Run("git", "init --bare {0}".F(GitRoot));
-			}
 
 			while( conn.Connected )
 			{
@@ -88,9 +104,14 @@ namespace bot
 					{
 						if (!repos.Any(a => a.Alias == args[1]))
 						{
-							lock (repos)
-								repos.Add(new Repo(args[1], args[2]));
-							SendTo(agent, "Done.");
+							if (!Git.AddRepo(args[1], args[2]))
+								SendTo(agent, "Failed adding alias");
+							else
+							{
+								lock (repos)
+									repos.Add(new Repo(args[1]));
+								SendTo(agent, "Done.");
+							}
 						}
 						else
 							SendTo(agent, "Alias already exists");
@@ -165,8 +186,10 @@ namespace bot
 			lock (repos)
 				snapshot = repos.ToArray();
 
+			Git.Fetch();
+
 			var lastRepo = "";
-			foreach (var info in Repo.Update(snapshot))
+			foreach (var info in Repo.Update(snapshot, Git.GetRefs() ))
 			{
 				var alias = info.Split('/')[0];
 				if (alias != lastRepo)

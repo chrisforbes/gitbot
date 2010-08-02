@@ -1,6 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Text;
-using System;
 
 namespace bot
 {
@@ -9,6 +9,8 @@ namespace bot
 		public string StandardOutput;
 		public string StandardError;
 		public int ExitCode;
+
+		public bool Failed { get { return ExitCode != 0; } }
 	}
 
 	static class External
