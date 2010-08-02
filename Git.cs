@@ -43,9 +43,9 @@ namespace bot
 
 		public static Ref GetMergeBase( Ref a, Ref b )
 		{
+			var sha = External.Run("git", "--git-dir={0} merge-base {1} {2}".F(GitRoot, a.Sha, b.Sha)).StandardOutput;
 			return new Ref("", "(mergebase)",
-				External.Run("git", "--git-dir={0} merge-base {1} {2}".F(GitRoot, a.Sha, b.Sha)).StandardOutput
-				.Substring(0, 40));
+				sha.Length >= 40 ? sha.Substring(0, 40) : "");
 		}
 
 		public static string[] GetCommitsBetween(Ref a, Ref b)
