@@ -74,8 +74,15 @@ namespace bot
 			var url = "http://github.com/api/v2/yaml/repos/show/{0}/branches".F(repo);
 			using (var wc = new WebClient())
 			{
-				var result = wc.DownloadString(url);
-				return result.Split('\n').Where(a => a.StartsWith(" ")).Select(x => new Ref(alias, x)).ToArray();
+				try 
+				{
+					var result = wc.DownloadString(url);
+					return result.Split('\n').Where(a => a.StartsWith(" ")).Select(x => new Ref(alias, x)).ToArray();
+				}
+				catch (WebException) 
+				{
+					return new Ref[0];
+				}
 			}
 		}
 
