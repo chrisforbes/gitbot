@@ -13,7 +13,17 @@ namespace bot
 			if (b == null)
 				return "\t{0}/{1}: {2} -> (deleted)".F(a.Alias, a.Name, a.ShortSha);
 
-			return "\t{0}/{1}: {2} -> {3}".F(a.Alias, a.Name, a.ShortSha, b.ShortSha);
+			var basicReport = "\t{0}/{1}: {2} -> {3}".F(a.Alias, a.Name, a.ShortSha, b.ShortSha);
+
+			var m = new Ref("", "(mergebase)", Git.GetMergeBase(a, b));
+			if (m.Sha == a.Sha)
+			{
+				// fast-forward. todo: find out if anyone else had these commits first.
+				var newCommits = Git.GetCommitsBetween(m, b);
+				return "{0} (ff; +{1} new commits)".F(basicReport, newCommits.Length);
+			}
+
+			return basicReport;
 		}
 
 		public static IEnumerable<string> Update(Repo[] repos, Ref[] allNewRefs)
