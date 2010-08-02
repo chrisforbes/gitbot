@@ -83,8 +83,8 @@ namespace bot
 					SendTo(agent, "What? ({0})".F(args.Length));
 					return;
 				}
-
-				if (repos.Select( a => a.Name == args[1] || a.Alias == args[2]).Count() == 0)
+				
+				if (!repos.Any( a => a.Alias == args[1]))
 				{
 					lock(repos)
 						repos.Add(new Repo(args[1], args[2]));
@@ -106,7 +106,7 @@ namespace bot
 					return;
 				}
 
-				if (repos.Select( a => a.Alias == args[1]).Count() == 1)
+				if (repos.Any( a => a.Alias == args[1]))
 				{
 					lock (repos)
 						repos.RemoveAll(r => r.Alias == args[1]);
