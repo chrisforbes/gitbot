@@ -11,38 +11,34 @@ namespace bot
 	class Program
 	{
 		const int CheckInterval = 30000;
+		const int PingInterval = 15000;
 
 		static Connection conn;
 		static List<Repo> repos = new List<Repo>();
 		static int NextCheckTime = Environment.TickCount;
 		static bool UseSocks = false;
+		
+		//server info
+		static string Server = "irc.freenode.net";
+		static int Port = 6667;
+		static string Channel = "#openra";
+		
+		//bot info
+		static string UserName = "pizzabot2";
+		static string Nick = "openra_pizzabot2";
+		static string IRCName = "PizzaBot Returns!";
+		
 
 		static void Main(string[] args)
 		{
-			Socket s;
-			if (UseSocks)
-				s = SocksProxy.ConnectToSocks5Proxy("127.0.0.1", 1080,
-					"irc.freenode.net", 6667, "", "");
-			else
-			{
-				s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-				s.Connect("irc.freenode.net", 6667);
-			}
-			conn = new Connection(s);
-			
+			EstablishConnection();
 			conn.OnCommand += OnCommand;
-
-			conn.Run();
-
-			conn.Write("USER pizzabot a a :PizzaBot Returns!");
-			conn.Write("NICK openra_pizzabot");
-			conn.Write("JOIN #openra");
+			Connect();
 
 			while( conn.Connected )
 			{
-				// do stuff
-				conn.Write("PING irc.freenode.net");
-				Thread.Sleep(15000);
+				conn.Write("PING {0}".F(Server));
+				Thread.Sleep(PingInterval);
 
 				if (NextCheckTime - Environment.TickCount < 0)
 					Update();
@@ -51,53 +47,90 @@ namespace bot
 			Console.WriteLine("Connection dropped. Cause:");
 			Console.WriteLine(conn.Exception);
 		}
+		
+		static void EstablishConnection()
+		{
+			Socket s;
+			if (UseSocks)
+				s = SocksProxy.ConnectToSocks5Proxy("127.0.0.1", 1080, Server, (ushort) Port, "", "");
+			else
+			{
+				s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+				s.Connect(Server, Port);
+			}
+			conn = new Connection(s);
+			
+			conn.Run();
+		}
+		
+		static void Connect()
+		{
+			//TODO: handle nickname in use / registered
+			conn.Write("USER {0} a a :{1}".F(UserName, IRCName));
+			conn.Write("NICK {0}".F(Nick));
+			conn.Write("JOIN {0}".F(Channel));	
+		}
 
 		static void OnCommand(string c)
 		{
-			Console.WriteLine(c);
 			var agent = c.Split(':', '!', ' ').ElementAt(1);
 
 			if (c.Contains(":@add"))
 			{
-				var args = c.Split(' ').SkipWhile(a => a != ":@add").ToArray();
+				var args = GetArgs(c, ":@add");
 				if (args.Length != 3)
 				{
-					conn.Write("PRIVMSG #openra :{0}: What? ({1})".F(agent, args.Length));
+					SendTo(agent, "What? ({0})".F(args.Length));
 					return;
 				}
 
 				lock(repos)
 					repos.Add(new Repo(args[1], args[2]));
 
-				conn.Write("PRIVMSG #openra :{0}: Done.".F(agent));
+				SendTo(agent, "Done.");
 				NextCheckTime = Environment.TickCount;
 			}
 
 			if (c.Contains(":@rm"))
 			{
-				var args = c.Split(' ').SkipWhile(a => a != ":@rm").ToArray();
+				var args = GetArgs(c, ":@rm");
 				if (args.Length != 2)
 				{
-					conn.Write("PRIVMSG #openra :{0}: What?".F(agent));
+					SendTo(agent, "What?");
 					return;
 				}
 
 				lock (repos)
 					repos.RemoveAll(r => r.Alias == args[1]);
 
-				conn.Write("PRIVMSG #openra :{0}: Done.".F(agent));
+				SendTo(agent, "Done.");
 			}
 
 			if (c.Contains(":@repolist"))
 			{
 				var names = "";
 				lock( repos )
-					names = string.Join(",", repos.Select(r => r.Alias).ToArray());
+					names = string.Join(", ", repos.Select(r => r.Alias).ToArray());
 
-				conn.Write("PRIVMSG #openra :{0}: I'm currently tracking: {1}".F(agent, names));
+				 SendTo(agent, "I'm currently tracking: {0}".F(names));
 			}
 		}
 
+		static string[] GetArgs(string command, string directive)
+		{
+			return command.Split(' ').SkipWhile(a => a != directive).ToArray();
+		}
+		
+		static void SendTo(string user, string res)
+		{
+			conn.Write("PRIVMSG {0} :{1}: {2}".F(Channel, user, res));
+		}
+		
+		static void Send(string res)
+		{
+			conn.Write("PRIVMSG {0} :{1}".F(Channel, res));
+		}
+		
 		static void Update()
 		{
 			Repo[] snapshot;
@@ -111,9 +144,9 @@ namespace bot
 				if (alias != lastRepo)
 				{
 					lastRepo = alias;
-					conn.Write("PRIVMSG #openra :In `{0}`:".F(alias.Trim()));
+					Send("In `{0}`:".F(alias.Trim()));
 				}
-				conn.Write("PRIVMSG #openra :{0}".F(info));
+				Send("{0}".F(info));
 			}
 
 			NextCheckTime = Environment.TickCount + CheckInterval;
