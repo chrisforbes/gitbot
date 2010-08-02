@@ -49,7 +49,7 @@ namespace bot
 
 		public static string[] GetCommitsBetween(Ref a, Ref b)
 		{
-			return External.Run("git", "--git-dir={0} log {1}..{2} --graph --online --no-color".F(
+			return External.Run("git", "--git-dir={0} log {1}..{2} --graph --oneline --no-color".F(
 				GitRoot, a.Sha, b.Sha)).StandardOutput.Lines();
 		}
 	}
