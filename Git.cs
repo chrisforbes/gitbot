@@ -41,10 +41,11 @@ namespace bot
 			return !External.Run("git", "--git-dir={0} fetch --all".F(GitRoot)).Failed;
 		}
 
-		public static string GetMergeBase( Ref a, Ref b )
+		public static Ref GetMergeBase( Ref a, Ref b )
 		{
-			return External.Run("git", "--git-dir={0} merge-base {1} {2}".F(GitRoot, a.Sha, b.Sha)).StandardOutput
-				.Substring(0, 40);
+			return new Ref("", "(mergebase)",
+				External.Run("git", "--git-dir={0} merge-base {1} {2}".F(GitRoot, a.Sha, b.Sha)).StandardOutput
+				.Substring(0, 40));
 		}
 
 		public static string[] GetCommitsBetween(Ref a, Ref b)
