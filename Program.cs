@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -206,17 +206,8 @@ namespace bot
 
 			Git.Fetch();
 
-			var lastRepo = "";
 			foreach (var info in Analyzer.Update(snapshot, Git.GetRefs()))
-			{
-				var alias = info.Split('/')[0];
-				if (alias != lastRepo)
-				{
-					lastRepo = alias;
-					Send("In `{0}`:".F(alias.Trim()));
-				}
 				Send("{0}".F(info));
-			}
 
 			NextCheckTime = Environment.TickCount + CheckInterval;
 		}
