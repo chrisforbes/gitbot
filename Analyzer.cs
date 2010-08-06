@@ -20,22 +20,22 @@ namespace bot
 			{
 				var m = GetBestMergeBase(b, oldRefs);
 				if (m.t == null)
-					return "\t{0}/{1}: {2} (new branch) {3}".F(b.Alias, b.Name, b.ShortSha, Shortener.Shorten(a, b));
+					return "{0}/{1}: {2} (new branch) {3}".F(b.Alias, b.Name, b.ShortSha, Shortener.Shorten(a, b));
 
 				if (m.u == 1)
-					return "\t{0}/{1}: {2} -> {3} (new branch; 1 new commit) {4}".F(
+					return "{0}/{1}: {2} -> {3} (new branch; 1 new commit) {4}".F(
 						b.Alias, b.Name, m.t.ShortSha, b.ShortSha, Shortener.Shorten(m.t, b)); 
 				
-				return "\t{0}/{1}: {2} -> {3} (new branch; {4} new commits) {5}".F(
+				return "{0}/{1}: {2} -> {3} (new branch; {4} new commits) {5}".F(
 					b.Alias, b.Name, m.t.ShortSha, b.ShortSha, m.u, Shortener.Shorten(m.t, b));
 			}
 
 			if (b == null)
-				return "\t{0}/{1}: {2} -> (deleted)".F(a.Alias, a.Name, a.ShortSha);
+				return "{0}/{1}: {2} -> (deleted)".F(a.Alias, a.Name, a.ShortSha);
 
 			// the meaty case: this branch existed, 
 			{
-				var basicReport = "\t{0}/{1}: {2} -> {3}".F(a.Alias, a.Name, a.ShortSha, b.ShortSha);
+				var basicReport = "{0}/{1}: {2} -> {3}".F(a.Alias, a.Name, a.ShortSha, b.ShortSha);
 
 				var m = Git.GetMergeBase(a, b);
 				if (m.Sha == "")
