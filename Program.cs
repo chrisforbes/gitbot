@@ -177,13 +177,6 @@ namespace bot
 					SendTo(agent, "I'm not tracking any repos yet");
 			});
 			
-			Add("@quit", args =>
-			{
-				SendTo(agent, "Ok, Bye!");
-				conn.Write("QUIT");
-				conn.Stop();
-			});
-			
 			Add("@help", args =>
 			{
 				SendTo(agent, "Commands:");
