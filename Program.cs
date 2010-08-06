@@ -51,9 +51,29 @@ namespace bot
 			foreach (var repo in repos)
 				repo.Refs = initialRefs.Where(r => r.Alias == repo.Alias).ToArray();
 
-			UseSocks = args.Contains("--socks");
-			RespondAsWhisper = args.Contains("--whisper");
-
+			try
+			{
+				for(int i = 0; i < args.Length; i++)
+				{
+					switch (args[i])
+					{
+						case "--socks" : UseSocks = true; break;
+						case "--whisper" : RespondAsWhisper = true; break;
+						case "--server" : Server = args[++i]; break;
+						case "--channel" : Channel = args[++i]; break;
+						case "--port" : Port = Int32.Parse(args[++i]); break;
+						case "--user-name" : UserName = args[++i]; break;
+						case "--nick" : Nick = args[++i]; break;
+						case "--irc-name" : IRCName = args[++i]; break;
+					}
+				}
+			}
+			catch (Exception) 
+			{
+				Console.WriteLine("Invalid type or number of arguments");
+				return;
+			}
+			
 			EstablishConnection();
 			conn.OnCommand += OnCommand;
 			Connect();
