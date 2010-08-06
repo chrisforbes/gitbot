@@ -15,6 +15,7 @@ namespace bot
 		static List<Repo> repos = new List<Repo>();
 		static int NextCheckTime = Environment.TickCount;
 		static bool UseSocks = false;
+		static bool RespondAsWhisper = false;
 		
 		//server info
 		static string Server = "irc.freenode.net";
@@ -51,6 +52,7 @@ namespace bot
 				repo.Refs = initialRefs.Where(r => r.Alias == repo.Alias).ToArray();
 
 			UseSocks = args.Contains("--socks");
+			RespondAsWhisper = args.Contains("--whisper");
 
 			EstablishConnection();
 			conn.OnCommand += OnCommand;
@@ -190,7 +192,10 @@ namespace bot
 		
 		static void SendTo(string user, string res)
 		{
-			conn.Write("PRIVMSG {0} :{1}: {2}".F(Channel, user, res));
+			if (RespondAsWhisper)
+				conn.Write("PRIVMSG {0} :{1}".F(user, res)); 
+			else
+				conn.Write("PRIVMSG {0} :{1}: {2}".F(Channel, user, res));
 		}
 		
 		static void Send(string res)
