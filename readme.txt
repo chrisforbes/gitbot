@@ -5,13 +5,13 @@ NAME
 	gitbot -- The (slightly less) stupid content announcer
 	
 SYNOPSIS
-	`gitbot	[--socks]`
-	`mono gitbot [--socks]`
+	`gitbot	[--socks] [--whisper]`
+	`mono gitbot [--socks] [--whisper]`
 	
 	`@add <alias> <github user/repo>`	-- start tracking a repo
 	`@rm <alias>`						-- stop tracking a repo
+	`@status <alias>`					-- shows the status of a repo, or all repos with the alias *
 	`@repolist`							-- list the repos
-	`@quit`								-- disconnect from irc
 	`@help`								-- list accepted commands
 
 DESCRIPTION
@@ -22,6 +22,9 @@ OPTIONS
 	`--socks`
 		Connects via a SOCKS5 proxy on localhost:1080. This is
 		useful for tunneling through SSH if you need to do that.
+	`--whisper`
+		Responds to commands directly to user, rather than in
+		the channel. Still posts updates to channel.
 	
 BUGS
 	Various cases could be interpreted more cleverly -- rebases, 
