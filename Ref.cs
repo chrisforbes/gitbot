@@ -14,5 +14,9 @@ namespace bot
 		}
 
 		public string ShortSha { get { return Sha.Substring(0, 8); } }
+		
+		public string UserName { get { return Git.GetRemoteName(this); } }
+		
+		public string RepoName { get { return Git.GetRemoteRepoName(this); } }
 	}
 }

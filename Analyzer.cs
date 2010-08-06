@@ -20,10 +20,14 @@ namespace bot
 			{
 				var m = GetBestMergeBase(b, oldRefs);
 				if (m.t == null)
-					return "\t{0}/{1}: {2} (new branch, can't figure out where it came from)".F(b.Alias, b.Name, b.ShortSha);
+					return "\t{0}/{1}: {2} (new branch) {3}".F(b.Alias, b.Name, b.ShortSha, Shortener.Shorten(a, b));
 
-				return "\t{0}/{1}: {2} -> {3} (new branch; +{4} new commits)".F(
-					b.Alias, b.Name, m.t.ShortSha, b.ShortSha, m.u);
+				if (m.u == 1)
+					return "\t{0}/{1}: {2} -> {3} (new branch; 1 new commit) {4}".F(
+						b.Alias, b.Name, m.t.ShortSha, b.ShortSha, Shortener.Shorten(m.t, b)); 
+				
+				return "\t{0}/{1}: {2} -> {3} (new branch; {4} new commits) {5}".F(
+					b.Alias, b.Name, m.t.ShortSha, b.ShortSha, m.u, Shortener.Shorten(m.t, b));
 			}
 
 			if (b == null)
@@ -31,8 +35,7 @@ namespace bot
 
 			// the meaty case: this branch existed, 
 			{
-				var url = Shortener.Shorten(a, b);
-				var basicReport = "\t{0}/{1}: {2} -> {3} {4}".F(a.Alias, a.Name, a.ShortSha, b.ShortSha, url);
+				var basicReport = "\t{0}/{1}: {2} -> {3}".F(a.Alias, a.Name, a.ShortSha, b.ShortSha);
 
 				var m = Git.GetMergeBase(a, b);
 				if (m.Sha == "")
@@ -43,28 +46,42 @@ namespace bot
 					// fast-forward. todo: find out if anyone else had these commits first.
 					var newCommits = Git.GetCommitsBetween(m, b).Length;
 
+					//if we have a prevOwner
 					var prevOwner = oldRefs.FirstOrDefault(q => q.Sha == b.Sha);
 					if (prevOwner != null)
-						return "{0} (ff; +{1} new commits from {2}/{3})".F(basicReport, newCommits,
-							prevOwner.Alias, prevOwner.Name);
-
-					return "{0} (ff; +{1} new commits)".F(basicReport, newCommits);
+					{
+						if(newCommits == 1)
+							return "{0} (1 new commit from {1}/{2}) {3}".F(basicReport,
+								prevOwner.Alias, prevOwner.Name, Shortener.Shorten(null, b));
+						else
+							return "{0} ({1} new commits from {2}/{3}) {4}".F(basicReport, newCommits,
+								prevOwner.Alias, prevOwner.Name, Shortener.Shorten(a, b));
+					}
+					
+					//otherwise
+					if (newCommits == 1)
+						return "{0} (1 new commit) {1}".F(basicReport , Shortener.Shorten(null, b));
+					
+					return "{0} ({1} new commits) {2}".F(basicReport, newCommits, Shortener.Shorten(a, b));
 				}
 
 				if (m.Sha == b.Sha)
 				{
 					// rewind. note; existence of these commits in some other tree is irrelevant.
 					var newCommits = Git.GetCommitsBetween(m, a);
-					return "{0} (rw; {1} commits removed)".F(basicReport, newCommits.Length);
+					if (newCommits.Length == 1)
+						return "{0} (1 commit removed)".F(basicReport);
+					else
+						return "{0} ({1} commits removed)".F(basicReport, newCommits.Length);
 				}
 
 				if (Git.GetCommitsBetween(m, a).Length == 1 &&
 					Git.GetCommitsBetween(m, b).Length == 1)
 				{
-					return "{0} (amended)".F(basicReport);
+					return "{0} (amended) {1}".F(basicReport, Shortener.Shorten(m, b));
 				}
 
-				return basicReport;
+				return "{0} {1}".F(basicReport, Shortener.Shorten(a, b));
 			}
 		}
 
