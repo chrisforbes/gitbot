@@ -138,6 +138,17 @@ namespace bot
 			
 			Add("@status <alias>", args =>
 			{
+				if (args[1] == "*")
+				{
+					lock ( repos )
+					{
+						foreach( var r in repos )
+							SendTo(agent, "{0}: {1}".F(r.Alias, string.Join(", ", 
+							       r.Refs.Select( rf => rf.Name ).ToArray()))); 
+					}
+					return;
+				}
+				
 				lock ( repos )
 				{
 					if (repos.Any( a => a.Alias == args[1]))
@@ -150,14 +161,20 @@ namespace bot
 						SendTo(agent, "Alias doesn't exist");
 				}
 			});
+			
 
 			Add("@repolist", args =>
 			{
-				var names = "";
-				lock( repos )
-					names = string.Join(", ", repos.Select(r => r.Alias).ToArray());
+				if ( repos.Count() != 0)
+				{
+					var names = "";
+					lock( repos )
+						names = string.Join(", ", repos.Select(r => r.Alias).ToArray());
 
-				 SendTo(agent, "I'm currently tracking: {0}".F(names));
+					 SendTo(agent, "I'm currently tracking: {0}".F(names));
+				}
+				else
+					SendTo(agent, "I'm not tracking any repos yet");
 			});
 			
 			Add("@quit", args =>
