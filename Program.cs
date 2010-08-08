@@ -18,14 +18,14 @@ namespace bot
 		static bool RespondAsWhisper = false;
 		
 		//server info
-		static string Server = "irc.freenode.net";
+		static string Server = null;
+		static string Channel = null;
 		static int Port = 6667;
-		static string Channel = "#openra";
 		
 		//bot info
-		static string UserName = "pizzabot2";
-		static string Nick = "openra_pizzabot2";
-		static string IRCName = "PizzaBot Returns!";
+		static string UserName = "pizzabot";
+		static string Nick = "pizzabot";
+		static string IRCName = "PizzaBot";
 		
 		static void Main(string[] args)
 		{
@@ -65,12 +65,20 @@ namespace bot
 						case "--user-name" : UserName = args[++i]; break;
 						case "--nick" : Nick = args[++i]; break;
 						case "--irc-name" : IRCName = args[++i]; break;
+						case "--bitly-username" : Shortener.Username = args[++i]; break;
+						case "--bitly-key" : Shortener.ApiKey = args[++i]; break;
 					}
 				}
 			}
 			catch (Exception) 
 			{
 				Console.WriteLine("Invalid type or number of arguments");
+				return;
+			}
+			
+			if (string.IsNullOrEmpty(Server) || string.IsNullOrEmpty(Channel))
+			{
+				Console.WriteLine("Must set a Server and Channel");
 				return;
 			}
 			
