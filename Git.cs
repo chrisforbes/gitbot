@@ -29,6 +29,11 @@ namespace bot
 				.Where(m => m.Success)
 				.Select(m => new Ref(m.Groups["alias"].Value, m.Groups["name"].Value, m.Groups["sha"].Value)).ToArray();
 		}
+		
+		public static string[] GetTags()
+		{
+			return External.Run("git", "--git-dir={0} tag".F(GitRoot)).StandardOutput.Lines();
+		}
 
 		public static bool AddRepo(string alias, string githubName)
 		{
@@ -45,7 +50,7 @@ namespace bot
 		public static bool Fetch()
 		{
 			External.Run("rm", "-rf {0}/refs/remotes/".F(GitRoot));
-			return !External.Run("git", "--git-dir={0} fetch --all".F(GitRoot)).Failed;
+			return !External.Run("git", "--git-dir={0} fetch --all --tags".F(GitRoot)).Failed;
 		}
 
 		public static Ref GetMergeBase( Ref a, Ref b )

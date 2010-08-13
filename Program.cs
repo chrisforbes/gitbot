@@ -13,12 +13,14 @@ namespace bot
 
 		static Connection conn;
 		static List<Repo> repos = new List<Repo>();
+		static string[] tags;
 		static int NextCheckTime = Environment.TickCount;
 		static bool UseSocks = false;
 		
 		//behaviour
 		static bool RespondAsWhisper = false;
 		static string[] AuthorizedNicks = new string[]{ };
+		static string TagScript = "";
 		
 		//server info
 		static string Server = null;
@@ -53,6 +55,8 @@ namespace bot
 			var initialRefs = Git.GetRefs();
 			foreach (var repo in repos)
 				repo.Refs = initialRefs.Where(r => r.Alias == repo.Alias).ToArray();
+			
+			tags = Git.GetTags();
 
 			try
 			{
@@ -71,6 +75,7 @@ namespace bot
 						case "--bitly-username" : Shortener.Username = args[++i]; break;
 						case "--bitly-key" : Shortener.ApiKey = args[++i]; break;
 						case "--authorized-nicks" : AuthorizedNicks = args[++i].Split(','); break;
+						case "--tag-script" : TagScript = args[++i]; break;
 					}
 				}
 			}
@@ -128,6 +133,7 @@ namespace bot
 
 		static void OnCommand(string c)
 		{
+			if (string.IsNullOrEmpty(c)) return;
 			var agent = c.Split(':', '!', ' ').ElementAt(1);
 			var commands = new Dictionary<string, Action<string[]>>();
 			Action<string, Action<string[]>> Add = commands.Add;
@@ -268,6 +274,11 @@ namespace bot
 			foreach (var info in Analyzer.Update(snapshot, Git.GetRefs()))
 				Send("{0}".F(info));
 
+			string[] t = Git.GetTags();
+			var newTags = tags.SymmetricDifference(t).ToArray();
+			if (newTags.Length > 0)
+				External.Run(TagScript, newTags.Last());
+			tags = t;
 			NextCheckTime = Environment.TickCount + CheckInterval;
 		}
 	}
