@@ -5,8 +5,8 @@ NAME
 	gitbot -- The (slightly less) stupid content announcer
 	
 SYNOPSIS
-	`gitbot	[--socks] [--whisper] [--port PORT] [--user-name UserName] [--nick Nick] [--irc-name IRCName] [--bitly-username UserName] [--bitly-key APIKey] --server Server --channel Channel`
-	`mono gitbot [--socks] [--whisper] [--port PORT] [--user-name UserName] [--nick Nick] [--irc-name IRCName] [--bitly-username UserName] [--bitly-key APIKey] --server Server --channel Channel`
+	`gitbot	[--socks] [--whisper] [--port PORT] [--user-name UserName] [--nick Nick] [--irc-name IRCName] [--bitly-username UserName] [--bitly-key APIKey] [--authorized-nicks nick1,nick2] --server Server --channel Channel`
+	`mono gitbot [--socks] [--whisper] [--port PORT] [--user-name UserName] [--nick Nick] [--irc-name IRCName] [--bitly-username UserName] [--bitly-key APIKey] [--authorized-nicks nick1,nick2] --server Server --channel Channel`
 	
 	`@add <alias> <github user/repo>`	-- start tracking a repo
 	`@rm <alias>`						-- stop tracking a repo
@@ -43,6 +43,9 @@ OPTIONS
 		Sets the username for bitly url shortening support
 	`--bitly-key ApiKey`
 		Sets the api key for bitly url shortening support
+	`--authorized-nicks nick1,nick2`
+		Sets the nicks that the bot will listen to. If not set, 
+		the bot will listen to anyone
 	
 BUGS
 	Various cases could be interpreted more cleverly -- rebases, 

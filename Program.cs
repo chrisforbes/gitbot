@@ -15,7 +15,10 @@ namespace bot
 		static List<Repo> repos = new List<Repo>();
 		static int NextCheckTime = Environment.TickCount;
 		static bool UseSocks = false;
+		
+		//behaviour
 		static bool RespondAsWhisper = false;
+		static string[] AuthorizedNicks = new string[]{ };
 		
 		//server info
 		static string Server = null;
@@ -67,6 +70,7 @@ namespace bot
 						case "--irc-name" : IRCName = args[++i]; break;
 						case "--bitly-username" : Shortener.Username = args[++i]; break;
 						case "--bitly-key" : Shortener.ApiKey = args[++i]; break;
+						case "--authorized-nicks" : AuthorizedNicks = args[++i].Split(','); break;
 					}
 				}
 			}
@@ -130,6 +134,12 @@ namespace bot
 
 			Add("@add <alias> <username/repo>", args =>
 			{
+				if (AuthorizedNicks.Count() != 0 && !AuthorizedNicks.Contains(agent))
+				{	
+					SendTo(agent, "You are not authorised to make changes.");
+					return;	
+				}
+				
 				lock ( repos )
 				{
 					if (!repos.Any(a => a.Alias == args[1]))
@@ -151,6 +161,12 @@ namespace bot
 
 			Add("@rm <alias>", args =>
 			{
+				if (AuthorizedNicks.Count() != 0 && !AuthorizedNicks.Contains(agent))
+				{	
+					SendTo(agent, "You are not authorised to make changes.");
+					return;	
+				}
+				
 				lock ( repos )
 				{
 					if (repos.Any( a => a.Alias == args[1]))
