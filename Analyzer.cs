@@ -23,8 +23,8 @@ namespace bot
 					return "{0}/{1}: {2} (new branch) {3}".F(b.Alias, b.Name, b.ShortSha, Shortener.Shorten(a, b));
 
 				if (m.u == 1)
-					return "{0}/{1}: {2} -> {3} (new branch; 1 new commit) {4}".F(
-						b.Alias, b.Name, m.t.ShortSha, b.ShortSha, Shortener.Shorten(m.t, b)); 
+					return "{0}/{1}: {2} -> {3} (new branch; 1 new commit) {4} {5}".F(
+						b.Alias, b.Name, m.t.ShortSha, b.ShortSha, Shortener.Shorten(m.t, b), Git.GetMessage(b)); 
 				
 				return "{0}/{1}: {2} -> {3} (new branch; {4} new commits) {5}".F(
 					b.Alias, b.Name, m.t.ShortSha, b.ShortSha, m.u, Shortener.Shorten(m.t, b));
@@ -51,8 +51,8 @@ namespace bot
 					if (prevOwner != null)
 					{
 						if(newCommits == 1)
-							return "{0} (1 new commit from {1}/{2}) {3}".F(basicReport,
-								prevOwner.Alias, prevOwner.Name, Shortener.Shorten(null, b));
+							return "{0} (1 new commit from {1}/{2}) {3} {4}".F(basicReport,
+								prevOwner.Alias, prevOwner.Name, Shortener.Shorten(null, b), Git.GetMessage(b));
 						else
 							return "{0} ({1} new commits from {2}/{3}) {4}".F(basicReport, newCommits,
 								prevOwner.Alias, prevOwner.Name, Shortener.Shorten(a, b));
@@ -60,7 +60,7 @@ namespace bot
 					
 					//otherwise
 					if (newCommits == 1)
-						return "{0} (1 new commit) {1}".F(basicReport , Shortener.Shorten(null, b));
+						return "{0} (1 new commit) {1} {2}".F(basicReport , Shortener.Shorten(null, b), Git.GetMessage(b));
 					
 					return "{0} ({1} new commits) {2}".F(basicReport, newCommits, Shortener.Shorten(a, b));
 				}
@@ -78,7 +78,7 @@ namespace bot
 				if (Git.GetCommitsBetween(m, a).Length == 1 &&
 					Git.GetCommitsBetween(m, b).Length == 1)
 				{
-					return "{0} (amended) {1}".F(basicReport, Shortener.Shorten(m, b));
+					return "{0} (amended) {1} {2}".F(basicReport, Shortener.Shorten(m, b), Git.GetMessage(b));
 				}
 
 				return "{0} {1}".F(basicReport, Shortener.Shorten(a, b));
