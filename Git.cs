@@ -49,8 +49,7 @@ namespace bot
 
 		public static bool Fetch()
 		{
-			External.Run("rm", "-rf {0}/refs/remotes/".F(GitRoot));
-			return !External.Run("git", "--git-dir={0} fetch --all --tags".F(GitRoot)).Failed;
+			return !External.Run("git", "--git-dir={0} fetch --all --prune".F(GitRoot)).Failed;
 		}
 
 		public static Ref GetMergeBase( Ref a, Ref b )
