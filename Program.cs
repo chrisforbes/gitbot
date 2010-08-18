@@ -274,11 +274,22 @@ namespace bot
 			foreach (var info in Analyzer.Update(snapshot, Git.GetRefs()))
 				Send("{0}".F(info));
 
-			string[] t = Git.GetTags();
-			var newTags = tags.SymmetricDifference(t).ToArray();
-			if (newTags.Length > 0)
-				External.Run(TagScript, newTags.Last());
+			var t = Git.GetTags();
+			var newTag = t.Except(tags).LastOrDefault();
+			if (newTag != null)
+				try
+				{
+					Send("Running external command for tag `{0}`".F(newTag));
+					External.Run(TagScript, newTag);
+					Send("Done.");
+				}
+				catch( Exception e )
+				{
+					Console.WriteLine(e);
+					Send("Fail! Check the console log for why.");
+				}
 			tags = t;
+
 			NextCheckTime = Environment.TickCount + CheckInterval;
 		}
 	}
