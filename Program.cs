@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
+using System.Net;
+using System.Text;
+using System.IO;
 
 namespace bot
 {
@@ -226,12 +229,68 @@ namespace bot
 				else
 					SendTo(agent, "I'm not tracking any repos yet");
 			});
-			
+
 			Add("@help", args =>
 			{
 				SendTo(agent, "Commands:");
-					foreach (var cmd in commands.Keys)
-						SendTo(agent, "\t{0}".F(cmd));
+				foreach (var cmd in commands.Keys)
+					SendTo(agent, "\t{0}".F(cmd));
+			});
+
+			Add("@conv <amt> <fromUnit> <toUnit>", args =>
+			{
+				if (args.Length == 4)
+				{
+					var amount = double.Parse(args[1]);
+					var fromCur = args[2];
+					var toCur = args[3];
+
+					var sb = new StringBuilder();
+					sb.AppendFormat("http://google.com/ig/calculator?hl=en&q={0}{1}%3D%3F{2}",
+						amount, fromCur, toCur);
+
+					WebRequest req = WebRequest.Create(sb.ToString());
+					StreamReader reader = null;
+					try
+					{
+						reader = new StreamReader(req.GetResponse().GetResponseStream());
+					}
+					catch (WebException e)
+					{
+						SendTo(agent, e.ToString());
+						reader.Close();
+						return;
+					}
+
+					var result = reader.ReadToEnd();
+
+					reader.Close();
+
+					// {lhs: "100 Euros",rhs: "139.983271 Australian dollars",error: "",icc: true}
+					// don't know what icc is
+					var components = result.Substring(1, result.Length - 2).Split(',');
+					Dictionary<string, string> results = new Dictionary<string, string>();
+					foreach (var component in components)
+					{
+						string[] pieces = component.Split(':');
+						string key = pieces[0].Trim();
+						string value = pieces[1].Trim();
+						value = value.Substring(1, value.Length - 2);
+						results.Add(key, value);
+					}
+
+					var lhs = results["lhs"];
+					var rhs = results["rhs"];
+
+					if (lhs == "" || rhs == "")
+					{
+						SendTo(agent, "Possible invalid query. Raw return: " + result);
+					}
+					else
+					{
+						SendTo(agent, lhs + " ~ " + rhs);
+					}
+				}
 			});
 
 			foreach( var cmd in commands )
