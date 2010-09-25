@@ -284,10 +284,17 @@ namespace bot
 
 					if (lhs == "" || rhs == "")
 					{
-						SendTo(agent, "Possible invalid query. Raw return: " + result);
+						var error = results["error"];
+						if (error == "")
+						{
+							error = "Unknown error";
+						}
+						SendTo(agent, "Possible invalid query. Error: " + error);
 					}
 					else
 					{
+						lhs = lhs.Replace((char)0xfffd, ',');
+						rhs = rhs.Replace((char)0xfffd, ',');
 						SendTo(agent, lhs + " ~ " + rhs);
 					}
 				}
