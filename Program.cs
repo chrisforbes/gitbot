@@ -237,17 +237,16 @@ namespace bot
 					SendTo(agent, "\t{0}".F(cmd));
 			});
 
-			Add("@conv <amt> <fromUnit> <toUnit>", args =>
+			Add("@conv <lhs> <rhs>", args =>
 			{
-				if (args.Length == 4)
+				if (args.Length == 3)
 				{
-					var amount = double.Parse(args[1]);
-					var fromCur = args[2];
-					var toCur = args[3];
+					var inLhs = args[1];
+					var inRhs = args[2];
 
 					var sb = new StringBuilder();
-					sb.AppendFormat("http://google.com/ig/calculator?hl=en&q={0}{1}%3D%3F{2}",
-						amount, fromCur, toCur);
+					sb.AppendFormat("http://google.com/ig/calculator?hl=en&q={0}%3D%3F{1}",
+						inLhs, inRhs);
 
 					WebRequest req = WebRequest.Create(sb.ToString());
 					StreamReader reader = null;
@@ -293,10 +292,15 @@ namespace bot
 					}
 					else
 					{
-						lhs = lhs.Replace((char)0xfffd, ',');
-						rhs = rhs.Replace((char)0xfffd, ',');
+						lhs = CleanupConversion(ref lhs);
+						rhs = CleanupConversion(ref rhs);
+
 						SendTo(agent, lhs + " ~ " + rhs);
 					}
+				}
+				else
+				{
+					SendTo(agent, "Usage: @conv <lhs> <rhs>");
 				}
 			});
 
@@ -311,9 +315,48 @@ namespace bot
 				}
 		}
 
+		private static System.String CleanupConversion(ref string cleanup)
+		{
+			string clean = cleanup.Replace((char)0xfffd, ',');
+			// multiplication symbol
+			clean = clean.Replace("#215;", "x");
+			// control character
+			clean = clean.Replace("\\x26", "");
+			// <sup> -> ^
+			clean = clean.Replace("\\x3csup\\x3e", "^");
+			// </sup>
+			clean = clean.Replace("\\x3c/sup\\x3e", "");
+			return clean;
+		}
+
 		static string[] GetArgs(string command, string directive)
 		{
-			return command.Split(' ').SkipWhile(a => a != directive).ToArray();
+			int count = 0;
+			command = command.Substring(command.IndexOf(directive) + 1);
+			string[] args = command.Split(' ');
+			List<string> fixedArgs = new List<string>();
+
+			string build = "";
+			foreach (char c in command)
+			{
+				if ((c == ' ') && (count % 2 == 0))
+				{
+					fixedArgs.Add(build);
+					build = "";
+				}
+				else if (c == '"')
+				{
+					count++;
+				}
+				else
+				{
+					build += c;
+				}
+			}
+			fixedArgs.Add(build);
+			return fixedArgs.ToArray();
+
+			//return command.Split(' ').SkipWhile(a => a != directive).ToArray();
 		}
 		
 		static void SendTo(string user, string res)
